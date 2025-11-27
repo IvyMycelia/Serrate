@@ -6,3 +6,7 @@
 *.o
 *.exe
 /serrate
+/bin
+
+# Output Files
+*output*.*
