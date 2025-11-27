@@ -1,0 +1,8 @@
+# Test Files
+/tests/
+*test*.*
+
+# Build Artifacts
+*.o
+*.exe
+/serrate
