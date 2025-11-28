@@ -54,7 +54,6 @@ static char Lexer_advance(Lexer* lexer) {}
 static void skip_whitespace(Lexer* lexer) {}
 static Token make_token(Lexer* lexer, TokenType type) {}
 Token Lexer_next(Lexer* lexer) {}
-Token Lexer_peek(Lexer* lexer) {}
 static Token identifier(Lexer* lexer) {}
 static Token number(Lexer* lexer) {}
 

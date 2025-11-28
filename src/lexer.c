@@ -3,7 +3,9 @@
 
 // Set up the lexer with pointers into the source, reset line/column counters, and prepare to start tokenizing.
 void Lexer_init(Lexer* lexer, const char* source) {
-
+    lexer->start, lexer->current = *source;
+    lexer->line = 1;
+    lexer->column = 0;
 }
 
 // Look at the current character without consuming it.
@@ -29,12 +31,6 @@ static Token make_token(Lexer* lexer, TokenType type) {
 // The main driver.
 // Skips whitespace —> sets start —> consumes chars —> figures out which token to emit —> returns it.
 Token Lexer_next(Lexer* lexer) {
-
-}
-
-// Look ahead one token without advancing the real lexer state.
-// Required for simple recursive-descent parsing.
-Token Lexer_peek(Lexer* lexer) {
 
 }
 
