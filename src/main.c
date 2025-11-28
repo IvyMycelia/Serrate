@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     do {
         token = Lexer_next(&lexer);
 
-        printf("Token: %.*s, Type: %s, Line: %d, Column: %d\n", token.length, token.start, token_type_name(token.type), token.line, token.column);
+        printf("Token: \"%.*s\"\n\tType: %s\n\tLine: %d\n\tColumn: %d\n", token.length, token.start, token_type_name(token.type), token.line, token.column);
     } while (token.type != TOKEN_EOF);
 
 

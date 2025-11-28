@@ -30,7 +30,7 @@ static inline int is_alpha(char c) {
 
 // Check if the character is a unicode arabic numeral character
 static inline int is_digit(char c) {
-    return (c >= 0) && (c <= 9);
+    return (c >= '0') && (c <= '9');
 }
 
 
