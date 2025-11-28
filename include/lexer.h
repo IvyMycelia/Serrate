@@ -48,14 +48,19 @@ typedef struct Lexer {
 } Lexer;
 
 // Forward Declarations
-void Lexer_init(Lexer*, const char* source);
-static char Lexer_peek_char(Lexer* lexer) {}
-static char Lexer_advance(Lexer* lexer) {}
-static void skip_whitespace(Lexer* lexer) {}
-static Token make_token(Lexer* lexer, TokenType type) {}
-Token Lexer_next(Lexer* lexer) {}
-static Token identifier(Lexer* lexer) {}
-static Token number(Lexer* lexer) {}
+void Lexer_init(Lexer* lexer, const char* source);
+static char Lexer_peek_char(Lexer* lexer);
+static char Lexer_advance(Lexer* lexer);
+static void skip_whitespace(Lexer* lexer);
+static Token make_token(Lexer* lexer, TokenType type);
+Token Lexer_next(Lexer* lexer);
+static Token identifier(Lexer* lexer);
+static Token number(Lexer* lexer);
+const char* token_type_name(TokenType type);
 
+// Helper Declarations
+static inline void increment_newline(Lexer* lexer);
+static inline int is_alpha(char c);
+static inline int is_digit(char c);
 
 #endif

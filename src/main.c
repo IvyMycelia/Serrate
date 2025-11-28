@@ -51,8 +51,6 @@ int main(int argc, char *argv[]) {
 
 
 
-
-
     /*
         Start the process to compile the file
     */
@@ -72,7 +70,8 @@ int main(int argc, char *argv[]) {
     char *source_code = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, file, 0);
     if (source_code == MAP_FAILED) { fprintf(stderr, "Could not allocate memory\n"); close(file); return -1; }
 
-    // write(STDOUT_FILENO, source_code, file_size); // Print source file contents
+    write(STDOUT_FILENO, source_code, file_size); // Print source file contents
+    printf("\n");
     
 
 
@@ -92,7 +91,7 @@ int main(int argc, char *argv[]) {
     do {
         token = Lexer_next(&lexer);
 
-        printf("Token: %.*s, Type: %s, Line: %d, Column: %d\n", token.length, token.start, token.type, token.line, token.column);
+        printf("Token: %.*s, Type: %s, Line: %d, Column: %d\n", token.length, token.start, token_type_name(token.type), token.line, token.column);
     } while (token.type != TOKEN_EOF);
 
 
