@@ -45,15 +45,19 @@ void parser_init(Parser* parser, Lexer* lexer) {
 // 
 Node* parse_factor(Parser* parser) {
     if (parser->current.type == TOKEN_INTEGER) {
-        int value = atoi(parser->current.start);    // Convert string to int
+        char* numstr = strndup(parser->current.start, parser->current.length);
+        long value = strtol(numstr, NULL, 10);
+        free(numstr);
         advance(parser);
-        return new_int_node(value);
+        return new_int_node((int)value);
     } 
     // If token is an identifier
     else if (parser->current.type == TOKEN_IDENTIFIER) {
         char* name = strndup(parser->current.start, parser->current.length);
         advance(parser);
-        return new_identifier_node(name);
+        Node* id = new_identifier_node(name);
+        free(name);
+        return id;
     }
     // If token is a '('
     else if (parser->current.type == TOKEN_LEFT_PAREN) {
@@ -122,8 +126,18 @@ Node* parse_statement(Parser* parser) {
             char* name = strndup(parser->current.start, parser->current.length);
             advance(parser);
 
+            // optional type annotation: : Type
+            if (parser->current.type == TOKEN_COLON) {
+                advance(parser);
+                if (parser->current.type == TOKEN_IDENTIFIER) {
+                    // consume type identifier (we don't currently store it)
+                    advance(parser);
+                }
+            }
+
             if (!match(parser, TOKEN_ASSIGN)) {
                 fprintf(stderr, "Expected '=' after identifier\n");
+                free(name);
                 return NULL;
             }
 
@@ -131,6 +145,7 @@ Node* parse_statement(Parser* parser) {
 
             node = new_node(AST_LET);
             add_child(node, new_identifier_node(name));
+            free(name);
             add_child(node, expression);
             break;
         }
@@ -146,8 +161,21 @@ Node* parse_statement(Parser* parser) {
             char* name = strndup(parser->current.start, parser->current.length);
             advance(parser);
 
+            // optional parameter list: ( ... )
+            if (parser->current.type == TOKEN_LEFT_PAREN) {
+                advance(parser);
+                while (parser->current.type != TOKEN_RIGHT_PAREN && parser->current.type != TOKEN_EOF) {
+                    advance(parser);
+                }
+                if (parser->current.type == TOKEN_RIGHT_PAREN) advance(parser);
+            }
+
+            // optional colon after header
+            if (parser->current.type == TOKEN_COLON) advance(parser);
+
             node = new_node(AST_FUNC);
             add_child(node, new_identifier_node(name)); // store function name
+            free(name);
 
             while (parser->current.type != TOKEN_END && parser->current.type != TOKEN_EOF) {
                 Node* statement = parse_statement(parser);
@@ -161,6 +189,9 @@ Node* parse_statement(Parser* parser) {
         case TOKEN_IF: {
             advance(parser);
             Node* condition = parse_expression(parser);
+
+            // optional colon after condition
+            if (parser->current.type == TOKEN_COLON) advance(parser);
 
             node = new_node(AST_IF);
             node->condition = condition;
@@ -178,6 +209,9 @@ Node* parse_statement(Parser* parser) {
         case TOKEN_WHILE: {
             advance(parser);
             Node* condition = parse_expression(parser);
+
+            // optional colon after condition
+            if (parser->current.type == TOKEN_COLON) advance(parser);
 
             node = new_node(AST_WHILE);
             node->condition = condition;
@@ -262,8 +296,4 @@ void print_ast(Node* node, int indent) {
     // Print children (expressions/statements)
     for (int i = 0; i < node->children_count; i++)
         print_ast(node->children[i], indent + 1);
-
-    // Print body (for FUNC/IF/WHILE)
-    // for (int i = 0; i < node->body_count; i++)
-    //     print_ast(node->body[i], indent + 1);
 }
