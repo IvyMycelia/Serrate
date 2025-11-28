@@ -2,18 +2,19 @@
 #define AST_H
 
 typedef enum {
-    IDENTIFIER,
-    INTEGER,   
+    AST_IDENTIFIER,
+    AST_INTEGER,   
     
     // Keywords
-    PROGRAM,
-    FUNC,
-    LET,
-    IF,
-    WHILE,
-    RETURN,
+    AST_PROGRAM,
+    AST_FUNC,
+    AST_LET,
+    AST_IF,
+    AST_WHILE,
+    AST_RETURN,
 
-    BINOP
+    AST_BINOP,
+    AST_UNARY
 } NodeType;
 
 typedef struct Node {
@@ -22,19 +23,17 @@ typedef struct Node {
     // Literals / Identifiers
     char* name;      // For IDENTIFIER
     int value;       // For INTEGER
-    Node* condition; // For if/while
-
-    // Node Bodies
-    Node** body;
-    int body_count;
+    struct Node* condition; // For if/while
 
     // Statements and Expressions
     struct Node** children;
     int children_count;
 
-    char op;        // Operator Type
+    // Body
+    // struct Node** body;
+    // int body_count;
 
-    // 
+    char op;        // Operator Type
 } Node;
 
 // Forward Declarations

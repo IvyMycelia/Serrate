@@ -42,28 +42,69 @@ void parser_init(Parser* parser, Lexer* lexer) {
 }
 
 
-//Parse a single expression to check what kind of token it is
-Node* parse_expression(Parser* parser) {
-    // If current token is an integer
-    if (parser->current.type == INTEGER) {
+// 
+Node* parse_factor(Parser* parser) {
+    if (parser->current.type == TOKEN_INTEGER) {
         int value = atoi(parser->current.start);    // Convert string to int
         advance(parser);
         return new_int_node(value);
     } 
     // If token is an identifier
-    else if (parser->current.type == IDENTIFIER) {
+    else if (parser->current.type == TOKEN_IDENTIFIER) {
         char* name = strndup(parser->current.start, parser->current.length);
         advance(parser);
         return new_identifier_node(name);
     }
-    // Unknown Expression
-    else {
-        fprintf(stderr, "Unexpected Token '%.*s' at Line: %d, Column: %d\n", 
-            parser->current.length, parser->current.start, 
-            parser->current.line, parser->current.column);
+    // If token is a '('
+    else if (parser->current.type == TOKEN_LEFT_PAREN) {
+        advance(parser);
+        Node* expression = parse_expression(parser);
+        if (!match(parser, TOKEN_RIGHT_PAREN)) {
+            fprintf(stderr, "Expected ')' after expression\n");
+            return NULL;
+        }
+        return expression;
+    }
+    else if (parser->current.type == TOKEN_MINUS) {
+        advance(parser);
+        Node* child = parse_factor(parser);
+        Node* unary_node = new_node(AST_UNARY);
+        unary_node->op = '-';
+        add_child(unary_node, child);
+        return unary_node;
+    } else {
+        fprintf(stderr, "Expected token '%.*s'\n", parser->current.length, parser->current.start);
         advance(parser);
         return NULL;
     }
+}
+
+
+// Handles Operators
+Node* parse_term(Parser* parser) {
+    Node* left = parse_factor(parser);
+    while (parser->current.type == TOKEN_ASTERISK || parser->current.type == TOKEN_DIVISION) {
+        char op = parser->current.type == TOKEN_ASTERISK ? '*' : '/';
+        advance(parser);
+        Node* right = parse_factor(parser);
+        Node* binop_node = new_binop_node(op, left, right);
+        left = binop_node;
+    }
+    return left;
+}
+
+
+//Parse a single expression to check what kind of token it is
+Node* parse_expression(Parser* parser) {
+    Node* left = parse_term(parser);  // handle *, / first
+    while (parser->current.type == TOKEN_PLUS || parser->current.type == TOKEN_MINUS) {
+        char op = parser->current.type == TOKEN_PLUS ? '+' : '-';
+        advance(parser);
+        Node* right = parse_term(parser);  // right side of +/-
+        Node* binop_node = new_binop_node(op, left, right);
+        left = binop_node;
+    }
+    return left;
 }
 
 
@@ -72,32 +113,32 @@ Node* parse_statement(Parser* parser) {
     Node* node = NULL;
 
     switch (parser->current.type) {
-        case LET: {
+        case TOKEN_LET: {
             advance(parser);
-            if (parser->current.type != IDENTIFIER) {
+            if (parser->current.type != TOKEN_IDENTIFIER) {
                 fprintf(stderr, "Expected identifier after: `let`\n");
                 return NULL;
             }
             char* name = strndup(parser->current.start, parser->current.length);
             advance(parser);
 
-            if (!match(parser, ASSIGN)) {
+            if (!match(parser, TOKEN_ASSIGN)) {
                 fprintf(stderr, "Expected '=' after identifier\n");
                 return NULL;
             }
 
             Node* expression = parse_expression(parser);
 
-            node = new_node(LET);
+            node = new_node(AST_LET);
             add_child(node, new_identifier_node(name));
             add_child(node, expression);
             break;
         }
 
-        case FUNC: {
+        case TOKEN_FUNC: {
             advance(parser);
 
-            if (parser->current.type != IDENTIFIER) {
+            if (parser->current.type != TOKEN_IDENTIFIER) {
                 fprintf(stderr, "Expected function name after `func`\n");
                 return NULL;
             }
@@ -105,64 +146,57 @@ Node* parse_statement(Parser* parser) {
             char* name = strndup(parser->current.start, parser->current.length);
             advance(parser);
 
-            node = new_node(FUNC);
+            node = new_node(AST_FUNC);
             add_child(node, new_identifier_node(name)); // store function name
 
-            node->body = NULL;
-            node->body_count = 0;
-
-            while (parser->current.type != END && parser->current.type != TOKEN_EOF) {
+            while (parser->current.type != TOKEN_END && parser->current.type != TOKEN_EOF) {
                 Node* statement = parse_statement(parser);
                 if (statement) add_child(node, statement);
             }
 
-            if (parser->current.type == END) advance(parser);
+            if (parser->current.type == TOKEN_END) advance(parser);
             break;
         }
 
-        case IF: {
+        case TOKEN_IF: {
             advance(parser);
             Node* condition = parse_expression(parser);
 
-            node = new_node(IF);
+            node = new_node(AST_IF);
             node->condition = condition;
 
             // Parse body until `end`
-            node->body = NULL;
-            node->body_count = 0;
-            while (parser->current.type != END && parser->current.type != TOKEN_EOF) {
+            while (parser->current.type != TOKEN_END && parser->current.type != TOKEN_EOF) {
                 Node* statement = parse_statement(parser);
                 if (statement) add_child(node, statement);
             }
 
-            if (parser->current.type == END) advance(parser);
+            if (parser->current.type == TOKEN_END) advance(parser);
             break;
         }
 
-        case WHILE: {
+        case TOKEN_WHILE: {
             advance(parser);
             Node* condition = parse_expression(parser);
 
-            node = new_node(WHILE);
+            node = new_node(AST_WHILE);
             node->condition = condition;
 
             // Parse body until `end`
-            node->body = NULL;
-            node->body_count = 0;
-            while (parser->current.type != END && parser->current.type != TOKEN_EOF) {
+            while (parser->current.type != TOKEN_END && parser->current.type != TOKEN_EOF) {
                 Node* statement = parse_statement(parser);
                 if (statement) add_child(node, statement);
             }
 
-            if (parser->current.type == END) advance(parser);
+            if (parser->current.type == TOKEN_END) advance(parser);
             break;
         }
 
-        case RETURN: {
+        case TOKEN_RETURN: {
             advance(parser);
             Node* expression = parse_expression(parser);
 
-            node = new_node(RETURN);
+            node = new_node(AST_RETURN);
             add_child(node, expression);
             break;
         }
@@ -175,17 +209,61 @@ Node* parse_statement(Parser* parser) {
 
 
 // Parse entire program (loops until TOKEN_EOF, adding statements to root node)
-Node** parse_program(Parser* parser) {
-    Node** program_nodes = NULL;
-    int count = 0;
+Node* parse_program(Parser* parser) {
+    Node* root = new_node(AST_PROGRAM);
 
     while (parser->current.type != TOKEN_EOF) {
         Node* statement = parse_statement(parser);
-        if (statement) {
-            program_nodes = realloc(program_nodes, sizeof(Node*) * (count + 1));
-            program_nodes[count++] = statement;
-        }
+        if (statement) add_child(root, statement);
     }
 
-    return program_nodes;
+    return root;
+}
+
+
+// Print out AST information
+void print_ast(Node* node, int indent) {
+    if (!node) return;
+
+    for (int i = 0; i < indent; i++) printf("  "); // nicer indentation
+
+    switch (node->node) {
+        case AST_PROGRAM:       printf("PROGRAM\n"); break;
+        case AST_IDENTIFIER:    printf("IDENTIFIER %s\n", node->name); break;
+        case AST_INTEGER:       printf("INTEGER %d\n", node->value); break;
+
+        case AST_FUNC:          
+            printf("FUNC "); 
+            if (node->children_count > 0 && node->children[0])
+                printf("name=%s", node->children[0]->name);
+            printf("\n");
+            break;
+        case AST_LET:           
+            printf("LET "); 
+            if (node->children_count > 0 && node->children[0])
+                printf("%s = ...\n", node->children[0]->name);
+            break;
+        case AST_IF:            printf("IF\n"); break;
+        case AST_WHILE:         printf("WHILE\n"); break;
+        case AST_RETURN:        printf("RETURN\n"); break;
+
+        case AST_BINOP:         printf("BINOP %c\n", node->op); break;
+        case AST_UNARY:         printf("UNARY %c\n", node->op); break;
+        default:                printf("UNKNOWN NODE\n"); break;
+    }
+
+    // Print condition if present
+    if (node->condition) {
+        for (int i = 0; i < indent + 1; i++) printf("  ");
+        printf("Condition:\n");
+        print_ast(node->condition, indent + 2);
+    }
+
+    // Print children (expressions/statements)
+    for (int i = 0; i < node->children_count; i++)
+        print_ast(node->children[i], indent + 1);
+
+    // Print body (for FUNC/IF/WHILE)
+    // for (int i = 0; i < node->body_count; i++)
+    //     print_ast(node->body[i], indent + 1);
 }

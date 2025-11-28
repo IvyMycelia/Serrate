@@ -19,6 +19,8 @@ Language: C99 <—— For compatibility with most systems
 #include <unistd.h>
 
 #include "lexer.h"
+#include "ast.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) { fprintf(stderr, "Usage: %s <filename>\n", argv[0]); return 1; }
@@ -77,27 +79,22 @@ int main(int argc, char *argv[]) {
 
 
 
-
-    /* 
-        Lexer Stuff
-    */
-
-    // Initialize Lexer
+    // Initialize Lexer & Parser
     Lexer lexer;
     Lexer_init(&lexer, source_code);
 
-    // Fetch tokens until EndOfFile
-    Token token;
-    do {
-        token = Lexer_next(&lexer);
+    Parser parser;
+    parser_init(&parser, &lexer);
 
-        printf("Token: \"%.*s\"\n\tType: %s\n\tLine: %d\n\tColumn: %d\n", token.length, token.start, token_type_name(token.type), token.line, token.column);
-    } while (token.type != TOKEN_EOF);
+    Node* ast = parse_program(&parser);
 
+    print_ast(ast, 0);
+    free_ast(ast);
 
 
 
     // Clear allocated memory and close the file
+
     munmap(source_code, file_size);
     close(file);
 

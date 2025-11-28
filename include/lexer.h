@@ -2,34 +2,34 @@
 #define LEXER_H
 
 typedef enum TokenType {
-    IDENTIFIER,
-    INTEGER,
+    TOKEN_IDENTIFIER,
+    TOKEN_INTEGER,
 
     // Keywords
-    FUNC,
-    IF,
-    WHILE,
-    RETURN,
-    END,
-    LET,
+    TOKEN_FUNC,
+    TOKEN_IF,
+    TOKEN_WHILE,
+    TOKEN_RETURN,
+    TOKEN_END,
+    TOKEN_LET,
 
     // Delimiters
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    COLON,
+    TOKEN_LEFT_PAREN,
+    TOKEN_RIGHT_PAREN,
+    TOKEN_COLON,
 
     // Operators
-    ASSIGN,
-    GREATER_THAN,
-    LESS_THAN,
-    PLUS,
-    MINUS,
-    ASTERISK,
-    DIVISION,
+    TOKEN_ASSIGN,
+    TOKEN_GREATER_THAN,
+    TOKEN_LESS_THAN,
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_ASTERISK,
+    TOKEN_DIVISION,
 
-    NEWLINE,
+    TOKEN_NEWLINE,
 
-    UNKNOWN,
+    TOKEN_UNKNOWN,
 
     TOKEN_EOF
 } TokenType;

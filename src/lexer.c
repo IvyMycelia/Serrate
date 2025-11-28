@@ -127,23 +127,23 @@ Token Lexer_next(Lexer* lexer) {
     // Single-character tokens (minimal punctuation and operators)
     switch (c) {
         // Delimiters
-        case '(': return make_token(lexer, LEFT_PAREN);
-        case ')': return make_token(lexer, RIGHT_PAREN);
-        case ':': return make_token(lexer, COLON);
+        case '(': return make_token(lexer, TOKEN_LEFT_PAREN);
+        case ')': return make_token(lexer, TOKEN_RIGHT_PAREN);
+        case ':': return make_token(lexer, TOKEN_COLON);
 
         // Operators
-        case '=': return make_token(lexer, ASSIGN);
-        case '>': return make_token(lexer, GREATER_THAN);
-        case '<': return make_token(lexer, LESS_THAN);
+        case '=': return make_token(lexer, TOKEN_ASSIGN);
+        case '>': return make_token(lexer, TOKEN_GREATER_THAN);
+        case '<': return make_token(lexer, TOKEN_LESS_THAN);
 
-        case '+': return make_token(lexer, PLUS);
-        case '-': return make_token(lexer, MINUS);
-        case '*': return make_token(lexer, ASTERISK);
-        case '/': return make_token(lexer, DIVISION);
+        case '+': return make_token(lexer, TOKEN_PLUS);
+        case '-': return make_token(lexer, TOKEN_MINUS);
+        case '*': return make_token(lexer, TOKEN_ASTERISK);
+        case '/': return make_token(lexer, TOKEN_DIVISION);
 
         // Other
-        case '\n': return make_token(lexer, NEWLINE);
-        default: return make_token(lexer, UNKNOWN);
+        case '\n': return make_token(lexer, TOKEN_NEWLINE);
+        default: return make_token(lexer, TOKEN_UNKNOWN);
     }
 }
 
@@ -162,12 +162,12 @@ static Token identifier(Lexer* lexer) {
                 lexer->start[1] == 'u' &&
                 lexer->start[2] == 'n' &&
                 lexer->start[3] == 'c'
-            ) return make_token(lexer, FUNC); break;
+            ) return make_token(lexer, TOKEN_FUNC); break;
 
         case 'i': 
             if (length == 2 &&
                 lexer->start[1] == 'f'
-            ) return make_token(lexer, IF);
+            ) return make_token(lexer, TOKEN_IF);
 
         case 'w': 
             if (length == 5 &&
@@ -175,7 +175,7 @@ static Token identifier(Lexer* lexer) {
                 lexer->start[2] == 'i' &&
                 lexer->start[3] == 'l' &&
                 lexer->start[4] == 'e'
-            ) return make_token(lexer, WHILE);
+            ) return make_token(lexer, TOKEN_WHILE);
 
         case 'r': 
             if (length == 6 &&
@@ -184,63 +184,63 @@ static Token identifier(Lexer* lexer) {
                 lexer->start[3] == 'u' &&
                 lexer->start[4] == 'r' &&
                 lexer->start[5] == 'n'
-            ) return make_token(lexer, RETURN);
+            ) return make_token(lexer, TOKEN_RETURN);
 
         case 'e': 
             if (length == 3 &&
                 lexer->start[1] == 'n' &&
                 lexer->start[2] == 'd'
-            ) return make_token(lexer, END);
+            ) return make_token(lexer, TOKEN_END);
 
         case 'l': 
             if (length == 3 &&
                 lexer->start[1] == 'e' &&
                 lexer->start[2] == 't'
-            ) return make_token(lexer, LET);
+            ) return make_token(lexer, TOKEN_LET);
         
-        default: return make_token(lexer, IDENTIFIER);
+        default: return make_token(lexer, TOKEN_IDENTIFIER);
     }
 
-    return make_token(lexer, UNKNOWN);
+    return make_token(lexer, TOKEN_UNKNOWN);
 }
 
 // Consume a sequence of digits and return an INTEGER token.
 static Token number(Lexer* lexer) {
     while (is_digit(Lexer_peek_char(lexer))) Lexer_advance(lexer);
-    return make_token(lexer, INTEGER);
+    return make_token(lexer, TOKEN_INTEGER);
 }
 
 // Convert Token Type to a string for debugging
 const char* token_type_name(TokenType type) {
     switch (type) {
-        case IDENTIFIER:    return "IDENTIFIER";
-        case INTEGER:       return "INTEGER";
+        case TOKEN_IDENTIFIER:    return "IDENTIFIER";
+        case TOKEN_INTEGER:       return "INTEGER";
 
         // Keywords
-        case FUNC:          return "FUNC";
-        case IF:            return "IF";
-        case WHILE:         return "WHILE";
-        case RETURN:        return "RETURN";
-        case END:           return "END";
-        case LET:           return "LET";
+        case TOKEN_FUNC:          return "FUNC";
+        case TOKEN_IF:            return "IF";
+        case TOKEN_WHILE:         return "WHILE";
+        case TOKEN_RETURN:        return "RETURN";
+        case TOKEN_END:           return "END";
+        case TOKEN_LET:           return "LET";
 
         // Delimiters
-        case LEFT_PAREN:    return "LEFT_PAREN";
-        case RIGHT_PAREN:   return "RIGHT_PAREN";
-        case COLON:         return "COLON";
+        case TOKEN_LEFT_PAREN:    return "LEFT_PAREN";
+        case TOKEN_RIGHT_PAREN:   return "RIGHT_PAREN";
+        case TOKEN_COLON:         return "COLON";
 
         // Operators
-        case ASSIGN:        return "ASSIGN";
-        case GREATER_THAN:  return "GREATER_THAN";
-        case LESS_THAN:     return "LESS_THAN";
-        case PLUS:          return "PLUS";
-        case MINUS:         return "MINUS";
-        case ASTERISK:      return "ASTERISK";
-        case DIVISION:      return "DIVISION";
+        case TOKEN_ASSIGN:        return "ASSIGN";
+        case TOKEN_GREATER_THAN:  return "GREATER_THAN";
+        case TOKEN_LESS_THAN:     return "LESS_THAN";
+        case TOKEN_PLUS:          return "PLUS";
+        case TOKEN_MINUS:         return "MINUS";
+        case TOKEN_ASTERISK:      return "ASTERISK";
+        case TOKEN_DIVISION:      return "DIVISION";
 
         // Other
-        case NEWLINE:       return "NEWLINE";
-        case UNKNOWN:       return "UNKNOWN";
+        case TOKEN_NEWLINE:       return "NEWLINE";
+        case TOKEN_UNKNOWN:       return "UNKNOWN";
         case TOKEN_EOF:     return "TOKEN_EOF";
 
         // Ruh Roh

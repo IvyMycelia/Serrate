@@ -12,8 +12,11 @@ typedef struct {
 
 // Forward Declarations
 void parser_init(Parser* parser, Lexer* lexer);
-Node** parse_program(Parser* parser);
-Node** parse_statement(Parser* parser);
-Node** parse_expression(Parser* parser);
+Node* parse_factor(Parser* parser);
+Node* parse_term(Parser* parser);
+Node* parse_program(Parser* parser);
+Node* parse_statement(Parser* parser);
+Node* parse_expression(Parser* parser);
+void print_ast(Node* node, int indent);
 
 #endif
