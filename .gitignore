@@ -1,3 +1,11 @@
+# IDE Files
+.vscode/
+
+# My files
+
+# System Files
+.DS_Store
+
 # Test Files
 /tests/
 *test*.*

@@ -12,7 +12,6 @@ typedef enum TokenType {
     RETURN,
     END,
     LET,
-    PRINT,
 
     // Delimiters
     LEFT_PAREN,
@@ -42,24 +41,22 @@ typedef struct Token {
     int line, column;
 } Token;
 
-typedef enum CharClass {
-    CHAR_ALPHA,
-    CHAR_DIGIT,
-    CHAR_WS,
-    CHAR_NEWLINE,
-    CHAR_SYMBOL,
-    CHAR_OTHER
-} CharClass;
-
 typedef struct Lexer {
     const char* start;
     const char* current;
     int line, column;
 } Lexer;
 
-
+// Forward Declarations
 void Lexer_init(Lexer*, const char* source);
-Token Lexer_next(Lexer*);
-Token Lexer_peek(Lexer*);
+static char Lexer_peek_char(Lexer* lexer) {}
+static char Lexer_advance(Lexer* lexer) {}
+static void skip_whitespace(Lexer* lexer) {}
+static Token make_token(Lexer* lexer, TokenType type) {}
+Token Lexer_next(Lexer* lexer) {}
+Token Lexer_peek(Lexer* lexer) {}
+static Token identifier(Lexer* lexer) {}
+static Token number(Lexer* lexer) {}
+
 
 #endif

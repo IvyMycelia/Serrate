@@ -18,6 +18,8 @@ Language: C99 <—— For compatibility with most systems
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "lexer.h"
+
 int main(int argc, char *argv[]) {
     if (argc < 2) { fprintf(stderr, "Usage: %s <filename>\n", argv[0]); return 1; }
 
@@ -49,11 +51,14 @@ int main(int argc, char *argv[]) {
 
 
 
+
+
     /*
         Start the process to compile the file
     */
 
     // Get source file
+    
     int file = open(flag1, O_RDONLY);
 
     if (file == -1) { fprintf(stderr, "Could not open file\n"); return 2; }
@@ -64,14 +69,41 @@ int main(int argc, char *argv[]) {
     size_t file_size = size.st_size;
 
     // Allocate exact memory needed, and get content of source file
-    char *content = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, file, 0);
-    if (content == MAP_FAILED) { fprintf(stderr, "Could not allocate memory\n"); close(file); return -1; }
+    char *source_code = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, file, 0);
+    if (source_code == MAP_FAILED) { fprintf(stderr, "Could not allocate memory\n"); close(file); return -1; }
 
-    // write(STDOUT_FILENO, content, file_size); // Print source file contents
+    // write(STDOUT_FILENO, source_code, file_size); // Print source file contents
     
+
+
+
+
+
+    /* 
+        Lexer Stuff
+    */
+
+    // Initialize Lexer
+    Lexer lexer;
+    Lexer_init(&lexer, source_code);
+
+    // Fetch tokens until EndOfFile
+    Token token;
+    do {
+        token = Lexer_next(&lexer);
+
+        printf("Token: %.*s, Type: %s, Line: %d, Column: %d\n", token.length, token.start, token.type, token.line, token.column);
+    } while (token.type != TOKEN_EOF);
+
+
+
+
     // Clear allocated memory and close the file
-    munmap(content, file_size);
+    munmap(source_code, file_size);
     close(file);
+
+
+
 
 
 
@@ -96,7 +128,8 @@ int main(int argc, char *argv[]) {
     }
 
 
-    
+
+
     // Exit program
     close(output_file);
 
