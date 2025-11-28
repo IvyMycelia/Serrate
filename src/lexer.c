@@ -1,6 +1,19 @@
 #include <string.h>
-
 #include "lexer.h"
+
+// Forward Declarations
+static char Lexer_peek_char(Lexer* lexer);
+static char Lexer_advance(Lexer* lexer);
+static void skip_whitespace(Lexer* lexer);
+static Token make_token(Lexer* lexer, TokenType type);
+static Token identifier(Lexer* lexer);
+static Token number(Lexer* lexer);
+
+// Helper Declarations
+static inline void increment_newline(Lexer* lexer);
+static inline int is_alpha(char c);
+static inline int is_digit(char c);
+
 
 /* 
     Helper Functions 
