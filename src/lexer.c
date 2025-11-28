@@ -11,7 +11,8 @@ void Lexer_init(Lexer* lexer, const char* source) {
 
 // Look at the current character without consuming it.
 static char Lexer_peek_char(Lexer* lexer) {
-
+    if (*lexer->current== '\0') return '\0';
+    return *lexer->current;
 }
 
 // Consume the current character and move the pointer forward. Also updates line/column tracking.
