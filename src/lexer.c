@@ -3,7 +3,8 @@
 
 // Set up the lexer with pointers into the source, reset line/column counters, and prepare to start tokenizing.
 void Lexer_init(Lexer* lexer, const char* source) {
-    lexer->start, lexer->current = *source;
+    lexer->start = source;
+    lexer->current = source;
     lexer->line = 1;
     lexer->column = 0;
 }
